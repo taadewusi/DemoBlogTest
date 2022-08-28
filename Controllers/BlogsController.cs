@@ -42,7 +42,6 @@ namespace DemoBlogTest.Controllers
                             var m = createdlocally.ToPagedList(page, recordsPerPage);
                             return View(m);
                         }
-
                     }
                 }
             }

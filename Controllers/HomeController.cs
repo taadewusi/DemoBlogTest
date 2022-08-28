@@ -4,6 +4,7 @@ using PagedList;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -16,8 +17,8 @@ namespace DemoBlogTest.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
         public async Task<ActionResult> Index(int page =1)
         {
-            var user = User.Identity.Name;
-            int recordsPerPage = 20;
+         
+            int recordsPerPage = 10;
             using (var https = new HttpClient())
             {
                 using (var response = await https.GetAsync("https://mocki.io/v1/d33691f7-1eb5-45aa-9642-8d538f6c5ebd"))
@@ -26,16 +27,16 @@ namespace DemoBlogTest.Controllers
                     var result = JsonConvert.DeserializeObject<APICall>(jsonvaries);
                     if (result.data.Count > 0)
                     {
-
                         var createdlocally = db.Blogs.ToList();
                         createdlocally.AddRange((result.data));
                         var m = createdlocally.ToPagedList(page, recordsPerPage);
                         return View(m);
                     }
-
                 }
             }
-            return View(db.Blogs.Where(x => x.User_Id == user).ToPagedList(page, recordsPerPage));
+            var normal = db.Blogs.ToList();
+            var sorted= normal.ToPagedList(page, recordsPerPage);
+            return View(sorted);
           
         }
 
@@ -51,6 +52,21 @@ namespace DemoBlogTest.Controllers
             ViewBag.Message = "Your contact page.";
 
             return View();
+        }
+
+        // GET: Blogs/Details/5
+        public async Task<ActionResult> Details(Guid? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Blog blog = await db.Blogs.FindAsync(id);
+            if (blog == null)
+            {
+                return HttpNotFound();
+            }
+            return View(blog);
         }
     }
 }

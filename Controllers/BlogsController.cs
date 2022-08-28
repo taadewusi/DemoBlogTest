@@ -11,6 +11,8 @@ using DemoBlogTest.Models;
 using Newtonsoft.Json;
 using System.Net.Http;
 using PagedList;
+using System.Configuration;
+using System.Web.Configuration;
 
 namespace DemoBlogTest.Controllers
 {
@@ -24,24 +26,29 @@ namespace DemoBlogTest.Controllers
         {
             var user = User.Identity.Name;
             int recordsPerPage = 20;
-            using (var https = new HttpClient())
+           var sysadmin=  WebConfigurationManager.AppSettings["SysAdmin"];
+            if (user == sysadmin)
             {
-                using (var response = await https.GetAsync("https://mocki.io/v1/d33691f7-1eb5-45aa-9642-8d538f6c5ebd"))
+                using (var https = new HttpClient())
                 {
-                    var jsonvaries = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<APICall>(jsonvaries);
-                    if (result.data.Count > 0)
-                    {                      
+                    using (var response = await https.GetAsync("https://mocki.io/v1/d33691f7-1eb5-45aa-9642-8d538f6c5ebd"))
+                    {
+                        var jsonvaries = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<APICall>(jsonvaries);
+                        if (result.data.Count > 0)
+                        {
+                            var createdlocally = db.Blogs.ToList();
+                            createdlocally.AddRange((result.data));
+                            var m = createdlocally.ToPagedList(page, recordsPerPage);
+                            return View(m);
+                        }
 
-                        var createdlocally = db.Blogs.ToList();
-                        createdlocally.AddRange((result.data));
-                         var m= createdlocally.ToPagedList(page, recordsPerPage);                       
-                        return View(m);
                     }
-
                 }
-            }       
-           return View(db.Blogs.Where(x => x.User_Id == user).ToPagedList(page, recordsPerPage));
+            }
+            var normaluser = db.Blogs.Where(x => x.User_Id == user).ToList();
+            var paged = normaluser.ToPagedList(page, recordsPerPage);
+           return View(paged);
         }
 
         // GET: Blogs/Details/5
@@ -74,10 +81,16 @@ namespace DemoBlogTest.Controllers
         {
             if (ModelState.IsValid)
             {
-                blog.BlogId = Guid.NewGuid();
-                db.Blogs.Add(blog);
-                await db.SaveChangesAsync();
-                return RedirectToAction("Index");
+                var check = db.Blogs.Where(x => x.Title == blog.Title).ToList();
+                if (check.Count<1)
+                {
+                    blog.BlogId = Guid.NewGuid();
+                    blog.User_Id = User.Identity.Name;
+                    blog.Publication_date = DateTime.Now;
+                    db.Blogs.Add(blog);
+                    await db.SaveChangesAsync();
+                    return RedirectToAction("Index");
+                }               
             }
 
             return View(blog);

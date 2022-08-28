@@ -1,0 +1,44 @@
+﻿@model DemoBlogTest.Models.Blog
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Blog</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Publication_date)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Publication_date)
+        </dd>
+
+       
+
+    </dl>
+</div>
+<p>
+  
+    @Html.ActionLink("Back", "Index")
+</p>

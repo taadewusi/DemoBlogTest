@@ -1,0 +1,54 @@
+﻿@using PagedList;
+@using PagedList.Mvc;
+@model IPagedList<DemoBlogTest.Models.Blog>
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+           Title
+        </th>
+        <th>
+     Description
+        </th>
+        <th>
+         Publication_date
+        </th>
+        
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Publication_date)
+            </td>
+          
+            <td>
+        
+                @Html.ActionLink("Details", "Details", new { id = item.BlogId }) 
+          
+            </td>
+        </tr>
+    }
+
+</table>
+
+<div class="pagedList">
+    @Html.PagedListPager(Model, page => Url.Action("", new { page }),
+PagedListRenderOptions.PageNumbersOnly)
+</div>
